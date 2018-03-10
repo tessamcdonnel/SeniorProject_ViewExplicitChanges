@@ -1,6 +1,6 @@
 
-setwd("/Users/Stephanie/Dropbox/IS Assessment Data Summer 2017/final files/High School")
-#setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
+#setwd("/Users/Stephanie/Dropbox/IS Assessment Data Summer 2017/final files/High School")
+setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
 setwd("/Users/tessamcdonnel/Dropbox/IS Assessment Data Summer 2017/final files/High School")
 
 
@@ -217,7 +217,7 @@ model5 = lmer(new_ach_gain ~ 1
               + instructor.gender
               + years.teaching.intro.stats
               + years.teaching.experience
-              + incentive_classification_post2
+              + incentive_classification_post
               + textbook.classification
               + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
 summary(model5)
@@ -237,7 +237,10 @@ summary(model6)
 # sig vars --> same as model5
 
 newMergedBoth$new_gain = newMergedBoth$ach_gain*(1-newMergedBoth$pre_perc)
-model7 = lmer(new_ach_gain ~ 1   
+
+newMergedBoth$incentive_classification_post2 = relevel(newMergedBoth$incentive_classification_post2, ref = "No")
+#seems to be the one I gave Soma before
+model7 = lmer(new_gain ~ 1   
               + new_pre_perc +
                 + gender_pre 
               + gpa_pre 
@@ -246,8 +249,9 @@ model7 = lmer(new_ach_gain ~ 1
               + years.teaching.experience
               + incentive_classification_post2
               + textbook.classification2
-              + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
+              + (1|instructor.last.name),data=newMergedBoth )
 summary(model7)
+lsmeans(model7)
 # sig vars --> same as model5&6
 
 # Model8/9/10 only use instructor last name as fixed effect 
@@ -284,8 +288,8 @@ newMergedBoth$center_gpa = newMergedBoth$gpa_pre-mean(newMergedBoth$gpa_pre, na.
 
 model9.5 = lmer(new_ach_gain ~ 1   
                 + center_pre 
-                
-                + gender_pre 
+
+                  + gender_pre 
                 +center_gpa
                 # + instructor.gender
                 # + years.teaching.intro.stats
@@ -394,6 +398,5 @@ boxplot(MergedBoth$post_perc ~ MergedBoth$incentive_classification_post)
 
 iscamsummary(MergedBoth$ach_gain, MergedBoth$incentive_classification_post)
 summary(aov(MergedBoth$ach_gain ~ MergedBoth$incentive_classification_post)) # Extremely small p-value, as incentive increases, ach_gain increases.
-
 
 
