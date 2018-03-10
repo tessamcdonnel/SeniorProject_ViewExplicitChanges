@@ -1,6 +1,6 @@
 
 #setwd("/Users/Stephanie/Dropbox/IS Assessment Data Summer 2017/final files/High School")
-setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
+#setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
 setwd("/Users/tessamcdonnel/Dropbox/IS Assessment Data Summer 2017/final files/High School")
 
 
@@ -10,7 +10,7 @@ library(ggplot2)
 load(url("http://www.rossmanchance.com/iscam3/ISCAM.RData"))
 library(lme4)
 library(lsmeans)
-library(lmerTest) # gives the p-value for the lmer function t-statistics
+
 ### Reading in the data set ###
 newMergedBoth <- read.csv("High School 16.17Feb23.csv")
 newMergedBoth$new_gain = newMergedBoth$new_ach_gain*(1-newMergedBoth$new_pre_perc)
@@ -164,7 +164,6 @@ boxplot(new_ach_gain~APstats, data=newMergedBoth, main="Achievable Gain by AP st
 
 ### Example of an HLM Model we have ran ###
 
-# model4/5/6/7 evaluate ach_gain with instructor last name and section
 model4 = lmer(new_ach_gain ~ 1   
               + new_pre_perc + Affect_pre
               + Cognitive.Competence_pre + Difficulty_pre 
@@ -208,7 +207,7 @@ model4 = lmer(new_ach_gain ~ 1
               
               + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
 summary(model4)
-# significant vars --> new_pre_perc, ....
+
 
 model5 = lmer(new_ach_gain ~ 1   
               + new_pre_perc +
@@ -217,11 +216,10 @@ model5 = lmer(new_ach_gain ~ 1
               + instructor.gender
               + years.teaching.intro.stats
               + years.teaching.experience
-              + incentive_classification_post
+              + incentive_classification_post2
               + textbook.classification
               + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
 summary(model5)
-# sig vars --> new_pre_perc, gender_pre, gpa_pre, incentive_class_post2
 
 model6 = lmer(new_ach_gain ~ 1   
               + new_pre_perc +
@@ -234,13 +232,9 @@ model6 = lmer(new_ach_gain ~ 1
               + textbook.classification2
               + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
 summary(model6)
-# sig vars --> same as model5
 
 newMergedBoth$new_gain = newMergedBoth$ach_gain*(1-newMergedBoth$pre_perc)
-
-newMergedBoth$incentive_classification_post2 = relevel(newMergedBoth$incentive_classification_post2, ref = "No")
-#seems to be the one I gave Soma before
-model7 = lmer(new_gain ~ 1   
+model7 = lmer(new_ach_gain ~ 1   
               + new_pre_perc +
                 + gender_pre 
               + gpa_pre 
@@ -249,12 +243,9 @@ model7 = lmer(new_gain ~ 1
               + years.teaching.experience
               + incentive_classification_post2
               + textbook.classification2
-              + (1|instructor.last.name),data=newMergedBoth )
+              + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
 summary(model7)
-lsmeans(model7)
-# sig vars --> same as model5&6
 
-# Model8/9/10 only use instructor last name as fixed effect 
 model8 = lmer(new_ach_gain ~ 1   
               + new_pre_perc +
                 + gender_pre 
@@ -270,7 +261,7 @@ summary(model8)
 gaise.familiar2 =newMergedBoth$gaise.familiar == "Completely"
 
 model9 = lmer(new_ach_gain ~ 1   
-              + new_pre_perc + 
+              + new_pre_perc +
                 + gender_pre 
               + gpa_pre 
               # + instructor.gender
@@ -281,14 +272,11 @@ model9 = lmer(new_ach_gain ~ 1
               + gaise.familiar2
               + (1|instructor.last.name),data=newMergedBoth )
 summary(model9)
-newMergedBoth$center_pre = newMergedBoth$new_pre_perc-mean(newMergedBoth$new_pre_perc) # centered pre_perc score
-newMergedBoth$center_post = newMergedBoth$new_post_perc-mean(newMergedBoth$new_post_perc) # centered post_perc score. Why does adding this change the analysis so much?
-
-newMergedBoth$center_gpa = newMergedBoth$gpa_pre-mean(newMergedBoth$gpa_pre, na.rm=T) # centered gpa_pre score
+newMergedBoth$center_pre = newMergedBoth$new_pre_perc-mean(newMergedBoth$new_pre_perc)
+newMergedBoth$center_gpa = newMergedBoth$gpa_pre-mean(newMergedBoth$gpa_pre, na.rm=T)
 
 model9.5 = lmer(new_ach_gain ~ 1   
-                + center_pre 
-
+                + center_pre +
                   + gender_pre 
                 +center_gpa
                 # + instructor.gender
@@ -299,7 +287,7 @@ model9.5 = lmer(new_ach_gain ~ 1
                 #+ gaise.familiar2
                 + (1|instructor.last.name),data=newMergedBoth )
 summary(model9.5)
-lsmeansLT(model9.5, "textbook.classification2") # need lmerTest package to use this function.
+lsmeans(model9.5, "textbook.classification2")
 
 model10 = lmer(new_ach_gain ~ 1   
                + center_pre 
@@ -313,7 +301,6 @@ model10 = lmer(new_ach_gain ~ 1
                + (1|instructor.last.name),data=newMergedBoth )
 summary(model10)
 lsmeans(model10, "textbook.classification2")
-
 
 #DC gains:
 #  textbook.classification2notSBI       -0.026044   0.040967  13.400000  -0.636  0.53562 
@@ -398,5 +385,6 @@ boxplot(MergedBoth$post_perc ~ MergedBoth$incentive_classification_post)
 
 iscamsummary(MergedBoth$ach_gain, MergedBoth$incentive_classification_post)
 summary(aov(MergedBoth$ach_gain ~ MergedBoth$incentive_classification_post)) # Extremely small p-value, as incentive increases, ach_gain increases.
+
 
 
