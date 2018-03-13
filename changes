@@ -1,5 +1,5 @@
 #setwd("/Users/Stephanie/Dropbox/IS Assessment Data Summer 2017/final files/High School")
-#setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
+setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
 setwd("/Users/tessamcdonnel/Dropbox/IS Assessment Data Summer 2017/final files/High School")
 
 
@@ -8,8 +8,7 @@ setwd("/Users/tessamcdonnel/Dropbox/IS Assessment Data Summer 2017/final files/H
 library(ggplot2)
 load(url("http://www.rossmanchance.com/iscam3/ISCAM.RData"))
 library(lme4)
-library(lsmeans) # gives me an error telling me to use 'emmeans' instead.
-# library(emmeans)
+library(lsmeans)
 library(lmerTest) # gives the p-value for the lmer function t-statistics
 ### Reading in the data set ###
 newMergedBoth <- read.csv("High School 16.17Feb23.csv")
@@ -93,7 +92,7 @@ ggplot(aes(y=new_ach_gain,x=textbook.classification,group=InstructorName_Section
 #grouped by instructor
 means2 <- tapply(newMergedBoth$new_ach_gain,newMergedBoth$textbook.classification,mean,na.rm=TRUE)
 grand_mean2 <- mean(newMergedBoth$new_ach_gain,na.rm=TRUE)
-ggplot(aes(y=new_ach_gain,x=textbook.classification,group=instructor.last.name, fill=textbook.classification),data=Merged_Box) + 
+ggplot(aes(y=new_ach_gain,x=textbook.classification,group=instructor.last.name, fill=textbook.classification),data=newMerged_Box) + 
   geom_boxplot() + xlab("Textbook/Instructor") + ylab("Achievable Gain") + ggtitle("Boxplots of Achievable Gains by Instructor and Textbook (16-17)") + 
   theme_bw() + geom_segment(aes(x=.647,y=means[1],xend=1.355,yend=means[1]), colour="deeppink4", size=1.3) +  geom_segment(aes(x=1.613,y=means[2],xend=2.355,yend=means[2]), colour="deeppink4", size=1.3) + geom_segment(aes(x=2.611,y=means[3],xend=3.363,yend=means[3]), colour="deeppink4", size=1.3) + geom_segment(aes(x=3.64,y=means[4],xend=4.389,yend=means[4]), colour="deeppink4", size=1.3) + geom_segment(aes(x=4.63,y=means[5],xend=5.37,yend=means[5]), colour="deeppink4", size=1.3)  + geom_segment(aes(x=0,y=grand_mean,xend=6,yend=grand_mean),colour="navyblue",show.legend=FALSE)
 
@@ -217,7 +216,7 @@ model5 = lmer(new_ach_gain ~ 1
               + instructor.gender
               + years.teaching.intro.stats
               + years.teaching.experience
-              + incentive_classification_post2
+              + incentive_classification_post
               + textbook.classification
               + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
 summary(model5)
@@ -237,7 +236,10 @@ summary(model6)
 # sig vars --> same as model5
 
 newMergedBoth$new_gain = newMergedBoth$ach_gain*(1-newMergedBoth$pre_perc)
-model7 = lmer(new_ach_gain ~ 1   
+
+newMergedBoth$incentive_classification_post2 = relevel(newMergedBoth$incentive_classification_post2, ref = "No")
+#seems to be the one I gave Soma before
+model7 = lmer(new_gain ~ 1   
               + new_pre_perc +
                 + gender_pre 
               + gpa_pre 
@@ -246,8 +248,9 @@ model7 = lmer(new_ach_gain ~ 1
               + years.teaching.experience
               + incentive_classification_post2
               + textbook.classification2
-              + (1|instructor.last.name/InstructorName_Section_Semester),data=newMergedBoth )
+              + (1|instructor.last.name),data=newMergedBoth )
 summary(model7)
+lsmeans(model7)
 # sig vars --> same as model5&6
 
 # Model8/9/10 only use instructor last name as fixed effect 
@@ -394,5 +397,6 @@ boxplot(MergedBoth$post_perc ~ MergedBoth$incentive_classification_post)
 
 iscamsummary(MergedBoth$ach_gain, MergedBoth$incentive_classification_post)
 summary(aov(MergedBoth$ach_gain ~ MergedBoth$incentive_classification_post)) # Extremely small p-value, as incentive increases, ach_gain increases.
+
 
 
