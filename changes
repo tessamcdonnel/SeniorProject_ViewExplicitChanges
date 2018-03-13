@@ -8,7 +8,8 @@ setwd("/Users/tessamcdonnel/Dropbox/IS Assessment Data Summer 2017/final files/H
 library(ggplot2)
 load(url("http://www.rossmanchance.com/iscam3/ISCAM.RData"))
 library(lme4)
-library(lsmeans)
+library(lsmeans) # gives me an error telling me to use 'emmeans' instead.
+# library(emmeans)
 library(lmerTest) # gives the p-value for the lmer function t-statistics
 ### Reading in the data set ###
 newMergedBoth <- read.csv("High School 16.17Feb23.csv")
@@ -393,8 +394,5 @@ boxplot(MergedBoth$post_perc ~ MergedBoth$incentive_classification_post)
 
 iscamsummary(MergedBoth$ach_gain, MergedBoth$incentive_classification_post)
 summary(aov(MergedBoth$ach_gain ~ MergedBoth$incentive_classification_post)) # Extremely small p-value, as incentive increases, ach_gain increases.
-
-
-
 
 
