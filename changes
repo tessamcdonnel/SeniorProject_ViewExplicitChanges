@@ -277,7 +277,7 @@ model9.5 = lmer(new_ach_gain ~ 1
 summary(model9.5)
 lsmeans(model9.5, "textbook.classification2")
 
-model10 = lmer(new_Sim_gains ~ 1   
+model10 = lmer(new_ach_gain ~ 1   
               + center_pre 
                 + gender_pre 
               + center_gpa
@@ -347,4 +347,6 @@ value_pre_results$total; value_post_results$total
 
 
 #############################################################33
+
+
 
