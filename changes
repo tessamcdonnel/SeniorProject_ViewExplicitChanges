@@ -1,10 +1,11 @@
 
+
 #setwd("/Users/Stephanie/Dropbox/IS Assessment Data Summer 2017/final files/High School")
-#setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
+setwd("/Users/bchance/Dropbox/ISI Assessment Data Summer 2017/final files/High School")
 setwd("/Users/tessamcdonnel/Dropbox/IS Assessment Data Summer 2017/final files/High School")
 
 
-
+options(scipen=2)
 ### Loading in Libraries ###
 library(ggplot2)
 load(url("http://www.rossmanchance.com/iscam3/ISCAM.RData"))
@@ -16,18 +17,37 @@ library(emmeans) # very similar to lsmeans...documentation of difference is here
 
 library(lmerTest) # gives the p-value for the lmer function t-statistics
 ### Reading in the data set ###
+#newMergedBoth <- read.csv("High School 16.17Feb23Feb23.csv")
 newMergedBoth <- read.csv("High School 16.17Mar14.csv")
 
 newMergedBoth$new_gain = newMergedBoth$new_ach_gain*(1-newMergedBoth$new_pre_perc)
+# Grouping students into 2 textbook categories
+textbook.classification2 = NULL
+for (i in 1:length(newMergedBoth$textbook.classification)){
+  if ( (newMergedBoth$textbook.classification[i] == "ISI") | (newMergedBoth$textbook.classification[i] == "ISIfirst") )  {
+    newMergedBoth$textbook.classification2[i] = "SBI"
+  }
+  else if ( (newMergedBoth$textbook.classification[i] == "notSBI") | (newMergedBoth$textbook.classification[i] == "notSBI2") ) {
+    newMergedBoth$textbook.classification2[i] = "NotSBI"
+  }
+}
 
+# I think we want to stick with using new_ach_gain so if I used this later, probably in error?
+#newMergedBoth$new_gain2 = newMergedBoth$ach_gain*(1-newMergedBoth$pre_perc) # i found new_gain defined this way, I think by Chance, located after model6
 
-# Taking out ach_gain outliers --> this eliminates 6 students (changes the analysis quite a bit - all 6 are in ISIfirst group)
-newMergedBoth <- newMergedBoth[newMergedBoth$new_ach_gain > -0.5,]
-#plot(newMergedBoth$new_ach_gain)
-#plot(newMergedBoth$new_gain)
+plot(newMergedBoth$new_ach_gain)
+plot(newMergedBoth$new_gain)
+
+# Taking out ach_gain outliers --> this eliminates 6 students (changes the analysis quite a bit)
+ newMergedBoth <- newMergedBoth[newMergedBoth$new_ach_gain > -0.5,]
+# plot(newMergedBoth$new_ach_gain)
+# plot(newMergedBoth$new_gain)
+table(complete.cases(newMergedBoth$incentive_classification_post2))
+# incentive_classification_post2 is coded wrong in the excel file! Starting line 275. 
+#line 275 is ok but 3/14 changed Peterson from large to medium
 
 ### Data summaries
-dim(newMergedBoth) # 625 students, 417 variables
+dim(newMergedBoth) # 631 students, 417 variables
 table(newMergedBoth$InstructorName_Section_Semester)
 length(unique(newMergedBoth$instructor.last.name)) # 24 instructors
 length(unique(newMergedBoth$institution))  # 24 institutions
@@ -39,7 +59,7 @@ length(unique(newMergedBoth$InstructorName_Section_Semester)) # 37
 iscamsummary(newMergedBoth$new_pre_perc)
 iscamsummary(newMergedBoth$new_post_perc)
 #     n    Min       Q1  Median      Q3     Max    Mean      SD 
-#    625  0.205   0.493   0.622   0.733   1.000   0.617   0.158  
+#    631  0.205   0.493   0.622   0.733   1.000   0.614   0.160 
 
 iscamsummary(newMergedBoth$new_gain)
 #     n    Min       Q1  Median      Q3     Max    Mean      SD 
@@ -52,47 +72,38 @@ iscamsummary(newMergedBoth$new_gain, newMergedBoth$textbook.classification)
 #notSBI   361 -0.232 0.0550  0.166 0.268 0.580 0.166 0.158
 #notSBI2   74 -0.205 0.0357  0.117 0.234 0.511 0.128 0.146
 
+iscamsummary(newMergedBoth$gpa_pre)
+iscamsummary(newMergedBoth$gpa_pre, newMergedBoth$textbook.classification2)
 
 iscamsummary(newMergedBoth$new_ach_gain)
 #     n    Min       Q1  Median      Q3     Max    Mean      SD 
-#   625  -0.483  0.0979   0.303   0.4830   1.00   0.282   0.285
+#   631  -0.947   0.0921  0.302   0.481   1.000   0.2730   0.299
 
 iscamsummary(newMergedBoth$new_ach_gain, newMergedBoth$textbook.classification)
 #          n     Min    Q1   Median  Q3   Max  Mean    SD
-#ISI       74 -0.370 0.0669  0.202 0.429 0.881 0.227 0.263
-#ISIfirst 116 -0.448 0.1240  0.317 0.476 0.826 0.280 0.268
+#ISI       75 -0.520 0.0600  0.202 0.426 0.881 0.217 0.275
+#ISIfirst 121 -0.947 0.1150  0.305 0.459 0.826 0.240 0.328
 #notSBI   361 -0.483 0.1110  0.331 0.525 1.000 0.312 0.300
 #notSBI2   74 -0.458 0.0545  0.204 0.363 0.684 0.199 0.236
 
-# Overall textbook affect on ach_gain/gain
-summary(aov(newMergedBoth$new_ach_gain ~ newMergedBoth$textbook.classification)) # p-val = 0.005
+# Overall textbook effect on ach_gain/gain
+summary(aov(newMergedBoth$new_ach_gain ~ newMergedBoth$textbook.classification)) # p-val = 0.002
 
-summary(aov(newMergedBoth$new_gain ~ newMergedBoth$textbook.classification)) 
-
-# Grouping students into 2 textbook categories
-textbook.classification2 = NULL
-for (i in 1:length(newMergedBoth$textbook.classification)){
-  if ( (newMergedBoth$textbook.classification[i] == "ISI") | (newMergedBoth$textbook.classification[i] == "ISIfirst") )  {
-    newMergedBoth$textbook.classification2[i] = "SBI"
-  }
-  else if ( (newMergedBoth$textbook.classification[i] == "notSBI") | (newMergedBoth$textbook.classification[i] == "notSBI2") ) {
-    newMergedBoth$textbook.classification2[i] = "NotSBI"
-  }
-}
+summary(aov(newMergedBoth$new_gain ~ newMergedBoth$textbook.classification)) # p-val = 0.032
 
 
 iscamsummary(newMergedBoth$new_ach_gain, newMergedBoth$textbook.classification2)
 #        n    Min   Q1    Median    Q3   Max  Mean    SD
 #NotSBI 435 -0.483 0.0980  0.308 0.503 1.000 0.292 0.293
-#SBI    190 -0.448 0.0964  0.292 0.455 0.881 0.259 0.266
+#SBI    196 -0.947 0.0656  0.279 0.445 0.881 0.231 0.308
 
 iscamsummary(newMergedBoth$new_gain, newMergedBoth$textbook.classification2)
 #        n    Min   Q1    Median    Q3   Max  Mean    SD
 #NotSBI 435 -0.232 0.0520  0.149 0.267 0.580 0.159 0.156
-#SBI    190 -0.208 0.048   0.151 0.240 0.489 0.144 0.142
+#SBI    196 -0.358 0.0347  0.143 0.237 0.489 0.131 0.158
 
-summary(aov(newMergedBoth$new_ach_gain ~ newMergedBoth$textbook.classification2)) # not sig
-summary(aov(newMergedBoth$new_gain ~ newMergedBoth$textbook.classification2)) # not sig
+summary(aov(newMergedBoth$new_ach_gain ~ newMergedBoth$textbook.classification2)) # p-val = 0.0169
+summary(aov(newMergedBoth$new_gain ~ newMergedBoth$textbook.classification2)) # p-val = 0.0362
 
 
 ## Boxplots ##
@@ -117,11 +128,11 @@ ggplot(aes(y=new_ach_gain,x=textbook.classification,group=instructor.last.name, 
 # Achievable Gain by student gender
 table(newMergedBoth$gender, newMergedBoth$textbook.classification2)
 #   NotSBI  SBI
-#1    221  112 #Female
-#2    213   78
+#1    221  114 #Female
+#2    213   82
 iscamsummary(newMergedBoth$new_ach_gain, newMergedBoth$gender)
 
-summary(aov(newMergedBoth$new_ach_gain ~ newMergedBoth$gender + newMergedBoth$textbook.classification2)) 
+summary(aov(newMergedBoth$new_ach_gain ~ newMergedBoth$gender + newMergedBoth$textbook.classification2)) # Male students had significantly larger new_ach_gains (p-val = 0.014)
 boxplot(new_ach_gain~gender, data=newMergedBoth, main="Achievable Gain by Student Gender", xlab="Gender (Female=1, Male=2)", ylab="Achievable Gain")
 
 
@@ -134,7 +145,7 @@ abline(regrline2)
 
 
 cor.test(newMergedBoth$gpa_pre, newMergedBoth$new_ach_gain, method = "pearson", alternative = 'greater')
-# Correlation coefficient = 0.19, p-val < 0.0001
+# Correlation coefficient = 0.182, p-val < 0.0001
 
 # Student Age
 iscamsummary(newMergedBoth$age, newMergedBoth$textbook.classification2) # The groups are homogeneous with respect to age (same mean, max, ect.)
@@ -146,9 +157,9 @@ abline(age_reg)
 # Ach_gain by Semester
 table(newMergedBoth$semester, newMergedBoth$textbook.classification2)
 #          NotSBI SBI
-#Fall         14  12
-#fullyear    413 157
-#Spring        8  21
+#Fall         14  13
+#fullyear    413 161
+#Spring        8  22
 summary(aov(newMergedBoth$new_ach_gain ~newMergedBoth$semester)) # p-val < 0.00001
 
 # Boxplots: ach_gain by semester
@@ -175,13 +186,14 @@ summary(regrline)
 plot(newMergedBoth$Value_change, newMergedBoth$new_ach_gain)
 abline(regrline)
 cor.test(newMergedBoth$Value_change, newMergedBoth$new_ach_gain, method = "pearson", alternative = 'greater')
+# Correlation coefficient = 0.134, p-val < 0.0005
 
 
 # Achievable gain by test order
 iscamsummary(newMergedBoth$new_ach_gain, newMergedBoth$Test.Order_post)
 # Order            n    Min    Q1     Median  Q3   Max  Mean    SD
-#Attitudes First  329 -0.458 0.0911  0.297 0.482 1.000 0.276 0.286
-#Concepts First   296 -0.483 0.1120  0.306 0.484 0.962 0.290 0.284
+# Attitudes First  332 -0.947 0.0852  0.296 0.480 1.000 0.266 0.301
+# Concepts  First  299 -0.642 0.1070  0.305 0.482 0.962 0.281 0.296
 summary(aov(newMergedBoth$new_ach_gain ~ newMergedBoth$Test.Order_post)) 
 
 
@@ -258,10 +270,6 @@ model5 = lmer(new_ach_gain ~ 1
 summary(model5)
 # sig vars --> new_pre_perc, gender_pre, gpa_pre, incentive_class_post2
 
-textbook.classification2 = newMergedBoth$textbook.classification
-textbook.classification2 = sub("ISIfirst", "ISI", textbook.classification2)
-textbook.classification2 = sub("notSBI2", "notSBI", textbook.classification2)
-
 model6 = lmer(new_ach_gain ~ 1   
               + new_pre_perc +
                 + gender_pre 
@@ -275,40 +283,43 @@ model6 = lmer(new_ach_gain ~ 1
 summary(model6)
 # sig vars --> same as model5
 
-#newMergedBoth$new_gain = newMergedBoth$ach_gain*(1-newMergedBoth$pre_perc)
 
 newMergedBoth$incentive_classification_post2 = relevel(newMergedBoth$incentive_classification_post2, ref = "No")
-#seems to be the one I gave Soma before
-model7 = lmer(new_gain ~ 1   
+#Model7 seems to be the one I gave Soma before
+#can match the output in Feb 27 file based on Feb23Feb23 data
+#switching to March14 data has different values for incentive (Peterson = No rather than large, Walter = No rather than missing)
+#ach_gain matches March 13 paper but not gain (or wrong gain) 
+
+model7 = lmer(new_ach_gain ~ 1   
               + new_pre_perc +
                 + gender_pre 
               + gpa_pre 
               + instructor.gender
-              + years.teaching.intro.stats
-              + years.teaching.experience
               + incentive_classification_post2
+              + textbook.classification2
+             + semester
+            + (1|instructor.last.name),data=newMergedBoth )
+summary(model7)
+lsmeans(model7)
+
+#for running each subscale with same predictors
+model7 = lmer(new_Sim_gains ~ 1   
+              + new_pre_perc +
+                + gender_pre 
+              + gpa_pre 
+              + instructor.gender
+              + incentive_classification_post2
+              + semester
               + textbook.classification2
               + (1|instructor.last.name),data=newMergedBoth )
 summary(model7)
 lsmeans(model7)
+
+
+
+
+
 # sig vars --> same as model5&6
-
-# checking model7 with incentive_classification2 var defined above
-#newMergedBoth$new_gain = newMergedBoth$ach_gain*(1-newMergedBoth$pre_perc)
-
-modelcheckmar14  = lmer(new_gain ~ 1   
-              + new_pre_perc +
-                + gender_pre 
-              + gpa_pre 
-              + instructor.gender
-              + years.teaching.intro.stats
-              + years.teaching.experience
-              + incentive_classification_post2
-              + textbook.classification2
-              + (1|instructor.last.name),data=newMergedBoth )
-summary(modelcheckmar14)
-lsmeans(modelcheckmar14)
-
 
 # Model8/9/10 only use instructor last name as fixed effect 
 model8 = lmer(new_ach_gain ~ 1   
