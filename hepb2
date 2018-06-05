@@ -1,0 +1,347 @@
+library(readxl) # to read in Excel files
+library(data.table) # need this package for the 'reshape' function
+
+load(url("http://www.rossmanchance.com/iscam3/ISCAM.RData")) # btw love this Dr. Chance, I use it all the time now
+
+HepB <- read_excel("/Users/tessamcdonnel/KINE_Video_Senior_Project/Qualtrics Video Testing Data_4-11-18.xlsx")
+dim(HepB)
+length(unique(HepB$ResponseId))
+    
+library(tidyr)
+library(dplyr)
+
+# I ordered the data by subject so I could easily compare the original data to my cleaned version
+# (these are new functions to me and I wanted to check and make sure the values were correct)
+HepB<- HepB[order(HepB$ResponseId),]
+HepB <- as.data.frame(HepB)
+
+# I'm referring to the 8 'groups' with Condition being the first number followed by .Individual video
+# Here I am creating variables that contain the average of the 3 rating scores from each person from each video. 
+# There will be a lot of NA's here (Everyone is either Condition 1,2,3,4)
+
+HepB$Rate_1.1 <- (HepB$justBYou_videorating_1+HepB$justBYou_videorating_2+HepB$justBYou_videorating_3)/3
+
+HepB$Rate_1.2<- (HepB$JustBAdovcate_Rating_1+HepB$JustBAdovcate_Rating_2+HepB$JustBAdovcate_Rating_3)/3
+
+HepB$Rate_2.1 <- (HepB$Proactive_ratings_1 +HepB$Proactive_ratings_3)/3
+
+HepB$Rate_2.2 <- (HepB$Espi_ratings_1+HepB$Espi_ratings_2+HepB$Espi_ratings_3)/3
+
+HepB$Rate_3.1 <- (HepB$Family_ratings_1+HepB$Family_ratings_2+HepB$Family_ratings_3)/3
+
+HepB$Rate_3.2 <- (HepB$Dai_ratings_1+HepB$Dai_ratings_2+HepB$Dai_ratings_3)/3
+
+HepB$Rate_4.1 <- (HepB$WhatHepB_ratings_1+HepB$WhatHepB_ratings_2+HepB$WhatHepB_ratings_3)/3
+
+HepB$Rate_4.2 <- (HepB$Prevent_ratings_1+HepB$Prevent_ratings_2+HepB$Prevent_ratings_3)/3
+
+
+# Averaging this variable - not sure what this is
+HepB$person_1.1 <- (HepB$justBYou_personratin_1 + HepB$justBYou_personratin_2 + HepB$justBYou_personratin_3 + 
+                      HepB$justBYou_personratin_4 + HepB$justBYou_personratin_5 + HepB$justBYou_personratin_6 +
+                      HepB$justBYou_personratin_7)/7
+
+HepB$person_1.2 <- (HepB$JustBAdvocacte_perso_1 + HepB$JustBAdvocacte_perso_2 + HepB$JustBAdvocacte_perso_3 + HepB$JustBAdvocacte_perso_4
+                + HepB$JustBAdvocacte_perso_5 + HepB$JustBAdvocacte_perso_6 + HepB$JustBAdvocacte_perso_7)/7
+
+
+HepB$person_2.1 <- (HepB$Proactive_person_1 + HepB$Proactive_person_2 + HepB$Proactive_person_3 + 
+                      HepB$Proactive_person_4 + HepB$Proactive_person_5 + HepB$Proactive_person_6 +
+                      HepB$Proactive_person_7)/7
+
+HepB$person_2.2 <- (HepB$Espi_person_1 + HepB$Espi_person_2 + HepB$Espi_person_3 + HepB$Espi_person_4
+                    + HepB$Espi_person_5 + HepB$Espi_person_6 + HepB$Espi_person_7)/7
+
+HepB$person_3.1 <- (HepB$Family_person_1 + HepB$Family_person_2 + HepB$Family_person_3 + 
+                      HepB$Family_person_4 + HepB$Family_person_5 + HepB$Family_person_6 +
+                      HepB$Family_person_7)/7
+
+HepB$person_3.2 <- (HepB$Dai_person_1 + HepB$Dai_person_2 + HepB$Dai_person_3 + HepB$Dai_person_4
+                    + HepB$Dai_person_5 + HepB$Dai_person_6 + HepB$Dai_person_7)/7
+
+HepB$person_4.1 <- (HepB$WhatHepB_person_1 + HepB$WhatHepB_person_2 + HepB$WhatHepB_person_3 + 
+                      HepB$WhatHepB_person_4 + HepB$WhatHepB_person_5 + HepB$WhatHepB_person_6 +
+                      HepB$WhatHepB_person_7)/7
+
+HepB$person_4.2 <- (HepB$Prevent_person_1 + HepB$Prevent_person_2 + HepB$Prevent_person_3 + HepB$Prevent_person_4
+                    + HepB$Prevent_person_5 + HepB$Prevent_person_6 + HepB$Prevent_person_7)/7
+
+
+# Averaging this var- PE 
+HepB$PE_1.1 <- (HepB$justBYou_PE_1 + HepB$justBYou_PE_2 + HepB$justBYou_PE_3 + HepB$justBYou_PE_4 + HepB$justBYou_PE_5
+                 + HepB$justBYou_PE_6 + HepB$justBYou_PE_7 + HepB$justBYou_PE_8 + HepB$justBYou_PE_9 + HepB$justBYou_PE_10)/10
+
+HepB$PE_1.2 <- (HepB$JustBadvocate_PE_1 + HepB$JustBadvocate_PE_2 + HepB$JustBadvocate_PE_3 + HepB$JustBadvocate_PE_4
+                 + HepB$JustBadvocate_PE_5 + HepB$JustBadvocate_PE_6 + HepB$JustBadvocate_PE_7 + HepB$JustBadvocate_PE_8 
+                 + HepB$JustBadvocate_PE_9 + HepB$JustBadvocate_PE_10)/10
+
+HepB$PE_2.1 <- (HepB$Proactive_PE_1 + HepB$Proactive_PE_2 + HepB$Proactive_PE_3 + HepB$Proactive_PE_4
+                 + HepB$Proactive_PE_5 + HepB$Proactive_PE_6 + HepB$Proactive_PE_7 + HepB$Proactive_PE_8 
+                 + HepB$Proactive_PE_9 + HepB$Proactive_PE_10)/10
+
+HepB$PE_2.2 <- (HepB$Espi_PE_1 + HepB$Espi_PE_2 + HepB$Espi_PE_3 + HepB$Espi_PE_4 + HepB$Espi_PE_5
+                 + HepB$Espi_PE_6 + HepB$Espi_PE_7 + HepB$Espi_PE_8 + HepB$Espi_PE_9 + HepB$Espi_PE_10)/10
+
+HepB$PE_3.1 <- (HepB$Family_PE_1 + HepB$Family_PE_2 + HepB$Family_PE_3 + HepB$Family_PE_4
+                 + HepB$Family_PE_5 + HepB$Family_PE_6 + HepB$Family_PE_7 + HepB$Family_PE_8 
+                 + HepB$Family_PE_9 + HepB$Family_PE_10)/10
+
+HepB$PE_3.2 <- (HepB$Dai_PE_1 + HepB$Dai_PE_2 + HepB$Dai_PE_3 + HepB$Dai_PE_4 + HepB$Dai_PE_5
+                 + HepB$Dai_PE_6 + HepB$Dai_PE_7 + HepB$Dai_PE_8 + HepB$Dai_PE_9 + HepB$Dai_PE_10)/10
+
+HepB$PE_4.1 <- (HepB$WhatHepB_PE_1 + HepB$WhatHepB_PE_2 + HepB$WhatHepB_PE_3 + HepB$WhatHepB_PE_4
+                 + HepB$WhatHepB_PE_5 + HepB$WhatHepB_PE_6 + HepB$WhatHepB_PE_7 + HepB$WhatHepB_PE_8 
+                 + HepB$WhatHepB_PE_9 + HepB$WhatHepB_PE_10)/10
+
+HepB$PE_4.2 <- (HepB$Prevent_PE_1 + HepB$Prevent_PE_2 + HepB$Prevent_PE_3 + HepB$Prevent_PE_4 + HepB$Prevent_PE_5
+                 + HepB$Prevent_PE_6 + HepB$Prevent_PE_7 + HepB$Prevent_PE_8 + HepB$Prevent_PE_9 + HepB$Prevent_PE_10)/10
+
+HepB$PerSuscep <- (HepB$PerSuscep_1+HepB$PerSuscep_2 + HepB$PerSuscep_3 + HepB$PerSuscep_4 + HepB$PerSuscep_5 + HepB$PerSuscep_6)/6
+
+HepB$PerSever <- (HepB$PerSever_1 + HepB$PerSever_2 + HepB$PerSever_3 + HepB$PerSever_4)/4
+
+HepB$PerBene <- (HepB$PerBene_1+HepB$PerBene_2 + HepB$PerBene_3 + HepB$PerBene_4 + HepB$PerBene_5 + HepB$PerBene_6)/6
+
+HepB$PerBarr <- (HepB$PerBarr_1+HepB$PerBarr_2 + HepB$PerBarr_3 + HepB$PerBarr_4 + HepB$PerBarr_5 + HepB$PerBarr_6 + HepB$PerBarr_7)/7
+
+HepB$stigma <- (HepB$Stigma_1+HepB$Stigma_2 + HepB$Stigma_3 + HepB$Stigma_4 + HepB$Stigma_5 + HepB$Stigma_6)/6
+
+HepB$Relationships_P <- (HepB$Relationships_Now_1 + HepB$Relationships_Now_2)/2
+
+HepB$Relationships_GP <- (HepB$Relationships_Now_3 + HepB$Relationships_Now_4 + HepB$Relationships_Now_5 + HepB$Relationships_Now_6)/4
+
+# This code is transposing the data file
+# Since there are repeated measures (each person sees 2 videos), I added an additional row for every subject that reflects the individual video
+clean <- reshape(HepB, idvar = "ResponseId", varying = list(c("Rate_1.1", "Rate_1.2", "Rate_2.1", "Rate_2.2", "Rate_3.1", 
+            "Rate_3.2", "Rate_4.1", "Rate_4.2"), c("person_1.1", "person_1.2", "person_2.1", "person_2.2", "person_3.1", "person_3.2", 
+              "person_4.1", "person_4.2"), c("PE_1.1", "PE_1.2", "PE_2.1", "PE_2.2", "PE_3.1", "PE_3.2", "PE_4.1", "PE_4.2")),
+                 direction = "long", sep = "_", v.names = c("RateVid", "ActorRate", "PEtotal"),
+                 timevar = "Video", times = paste(c("Video1.1","Video1.2", "Video2.1", "Video2.2", "Video3.1", "Video3.2", "Video4.1", "Video4.2")))
+
+
+dim(clean) # at this point there are 4,800 rows because every subject is represented in 8 rows, 300 subjects * 8 possible treatments
+clean= clean[!is.na(clean$RateVid),] # deletes rows that aren't applicable, now each subject is in 2 rows
+clean <- clean[order(clean$ResponseId),]
+dim(clean) # now there are 2 rows for each person (n = 1200)
+# Created a variable that easily groups the subjects into one of the 4 Conditions
+condition = NULL
+for (i in 1:length(clean$Video)){
+  if ( (clean$Video[i] == "Video1.1") | (clean$Video[i] == "Video1.2") )  {
+    clean$condition[i] = "Group1"
+  }
+  else if ( (clean$Video[i] == "Video2.1") | (clean$Video[i] == "Video2.2") ) {
+    clean$condition[i] = "Group2"
+  }
+  else if ( (clean$Video[i] == "Video3.1") | (clean$Video[i] == "Video3.2") ) {
+    clean$condition[i] = "Group3"
+  }
+  else if ( (clean$Video[i] == "Video4.1") | (clean$Video[i] == "Video4.2") ) {
+    clean$condition[i] = "Group4"
+  }
+}
+
+for (i in 1:length(clean$Finances)){
+  if ( (clean$Finances[i] == 2) | (clean$Finances[i] == 3) )  {
+    clean$Finances[i] = 2
+  }
+  
+}  
+
+
+for (i in 1:length(clean$School)){
+  if ( (clean$School[i] == 1) | (clean$School[i] == 2) | (clean$School[i] == 3) | (clean$School[i] == 4) )  {
+    clean$School[i] = 1
+  }
+  else if ( (clean$School[i] == 5) | (clean$School[i] == 6) )  {
+    clean$School[i] = 2
+  }
+}  
+  
+for (i in 1:length(clean$Marital)){
+  if ( (clean$Marital[i] == 3) | (clean$Marital[i] == 4) | (clean$Marital[i] == 5) | (clean$Marital[i] == 6) )  {
+    clean$Marital[i] = 2
+  }
+  else if ( (clean$Marital[i] == 1) | (clean$Marital[i] == 2) )  {
+    clean$Marital[i] = 1
+  }
+}  
+
+library(car)
+clean$cleanborn = recode(clean$Born, "1 = 23")
+
+clean$cleanborn = recode(cleanborn, "c(5, 25) = 1")
+
+cleanborn = recode(cleanborn, "6:26 = 2")
+table(cleanborn)
+
+for (i in 1:length(clean$Born)){
+  if ((clean$Born[i] == 5) | (clean$Born[i] == 25)) {
+    clean$Born[i] = 2
+  } else {
+    clean$Born[i] = 1
+  }
+}  
+
+# glm family = binomial for logistic regression
+
+for (i in 1:length(clean$Relative_HBV)){
+  if ( (clean$Relative_HBV[i] == 2) | (clean$Relative_HBV[i] == 3) )  {
+    clean$Relative_HBV[i] = 2
+  }
+}  
+
+for (i in 1:length(clean$Relative_HCC)){
+  if ( (clean$Relative_HCC[i] == 2) | (clean$Relative_HCC[i] == 3) )  {
+    clean$Relative_HCC[i] = 2
+  }
+}  
+
+
+for (i in 1:length(clean$Vaccine)){
+  if ( (clean$Vaccine[i] == 2) | (clean$Vaccine[i] == 3) )  {
+    clean$Vaccine[i] = 2
+  }
+}
+
+for (i in 1:length(clean$Bloodtest)){
+  if ( (clean$Bloodtest[i] == 2) | (clean$Bloodtest[i] == 3) )  {
+    clean$Bloodtest[i] = 2
+  }
+}
+
+for (i in 1:length(clean$DocRecom)){
+  if ( (clean$DocRecom[i] == 2) | (clean$DocRecom[i] == 3) )  {
+    clean$DocRecom[i] = 2
+  }
+}
+
+for (i in 1:length(clean$UsualCare)){
+  if ((clean$UsualCare[i] == 2) | (clean$UsualCare[i] == 3)) {
+    clean$UsualCare[i] = 1
+  } else {
+    clean$UsualCare[i] = 2
+  }
+} 
+
+Int_1 = NULL
+for (i in 1:length(clean$Intention_1)){
+  if ((clean$Intention_1[i] == 4) | (clean$Intention_1[i] == 5)) {
+    clean$Int_1[i] = 1
+  } else {
+    clean$Int_1[i] = 0
+  }
+} 
+
+Int_2 = NULL
+for (i in 1:length(clean$Intention_2)){
+  if ((clean$Intention_2[i] == 4) | (clean$Intention_2[i] == 5)) {
+    clean$Int_2[i] = 1
+  } else {
+    clean$Int_2[i] = 0
+  }
+} 
+
+Int_3 = NULL
+for (i in 1:length(clean$Intention_3)){
+  if ((clean$Intention_3[i] == 4) | (clean$Intention_3[i] == 5)) {
+    clean$Int_3[i] = 1
+  } else {
+    clean$Int_3[i] = 0
+  }
+} 
+
+Int_4 = NULL
+for (i in 1:length(clean$Intention_4)){
+  if ((clean$Intention_4[i] == 4) | (clean$Intention_4[i] == 5)) {
+    clean$Int_4[i] = 1
+  } else {
+    clean$Int_4[i] = 0
+  }
+} 
+
+
+
+
+write.csv(clean, "clean_data.csv")
+
+
+# Some analysis
+
+
+
+iscamsummary(clean$RateVid, clean$Video)
+boxplot(clean$RateVid~clean$Video)
+m1 <- aov(RateVid~Video, data=clean)
+m1
+summary(m1)
+
+iscamsummary(clean$RateVid, clean$condition)
+boxplot(clean$RateVid~clean$condition)
+m2 <- aov(RateVid~condition, data=clean)
+m2
+summary(m2)
+
+iscamsummary(clean$RateVid, clean$Children)
+boxplot(clean$RateVid~clean$Children)
+mChild <- aov(RateVid~Children, data=clean)
+mChild
+summary(mChild)
+
+iscamsummary(clean$ActorRate, clean$Children)
+boxplot(clean$ActorRate~clean$Children)
+mChild2 <- aov(ActorRate~Children, data=clean)
+mChild2
+summary(mChild2)
+
+iscamsummary(clean$PEtotal, clean$Children)
+boxplot(clean$PEtotal~clean$Children)
+mChild3 <- aov(PEtotal~Children, data=clean)
+mChild3
+summary(mChild3)
+
+
+iscamsummary(clean$ActorRate, clean$Video)
+boxplot(clean$ActorRate~clean$Video)
+m4 <- aov(ActorRate~Video, data=clean)
+m4
+summary(m4)
+
+iscamsummary(clean$ActorRate, clean$condition)
+boxplot(clean$ActorRate~clean$condition)
+m5 <- aov(ActorRate~condition, data=clean)
+m5
+summary(m5)
+
+iscamsummary(clean$ActorRate, clean$Children)
+boxplot(clean$ActorRate~clean$Children)
+m6 <- aov(ActorRate~Children, data=clean)
+m6
+summary(m6)
+
+
+
+## Ugh this is not simple logistic regression :(
+iscamsummary(clean$Intention_1, clean$condition)
+boxplot(clean$Intention_1~clean$condition)
+m3 <- aov(Intention_1~condition, data=clean)
+m3
+summary(m3)
+
+iscamsummary(clean$Intention_2, clean$condition)
+boxplot(clean$Intention_2~clean$condition)
+m4 <- aov(Intention_2~condition, data=clean)
+m4
+summary(m4)
+
+iscamsummary(clean$Intention_3, clean$condition)
+boxplot(clean$Intention_3~clean$condition)
+m5 <- aov(Intention_3~condition, data=clean)
+m5
+summary(m5)
+
+iscamsummary(clean$Intention_4, clean$condition)
+boxplot(clean$Intention_4~clean$condition)
+m6 <- aov(Intention_4~condition, data=clean)
+m6
+summary(m6)
+
